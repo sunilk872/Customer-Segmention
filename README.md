@@ -97,7 +97,7 @@ The dataset consists of various features categorized into **People**, **Products
 📂 Customer-Segmentation
 │── 📁 data               # Raw & processed datasets
 │── 📁 notebooks          # Jupyter notebooks for EDA & modeling
-│── 📁 Pickles            # Saved Pickle files
+│── 📁 Pickle             # Saved Pickle files
 │── 📄 README.md          # Project overview & details
 │── 📄 requirements.txt   # Dependencies
 │── 📄 app.py             # Clustering pipeline(Deployment)
