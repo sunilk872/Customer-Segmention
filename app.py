@@ -24,6 +24,12 @@ st.markdown(
         }
         .stSidebar {
             background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 10px;
+        }
+        .stSidebar div {
+            font-size: 16px !important;
+            color: #333;
         }
         .stButton>button {
             background-color: #4A90E2 !important;
@@ -45,11 +51,10 @@ def load_pickle_from_github(url):
         st.error(f"Failed to load {url}")
         return None
 
-# GitHub URLs for data and models
-df_url = "https://github.com/sunilk872/Customer-Segmention/raw/main/data/df_clean.xlsx"
-kmeans_url = "https://github.com/sunilk872/Customer-Segmention/raw/main/pickle/kmeans_model_2.pkl"
-pca_url = "https://github.com/sunilk872/Customer-Segmention/raw/main/pickle/pca_transformer.pkl"
+# GitHub URLs for models
 scaler_url = "https://github.com/sunilk872/Customer-Segmention/raw/main/pickle/scaler.pkl"
+pca_url = "https://github.com/sunilk872/Customer-Segmention/raw/main/pickle/pca_transformer.pkl"
+kmeans_url = "https://github.com/sunilk872/Customer-Segmention/raw/main/pickle/kmeans_model_2.pkl"
 
 # Title of the App
 st.markdown('<h1 class="stTitle">Customer Segmentation Model Deployment</h1>', unsafe_allow_html=True)
@@ -59,31 +64,33 @@ st.sidebar.header('🔹 User Input Parameters')
 
 def user_input_features():
     with st.sidebar:
-        INCOME = st.number_input("Income ($):", min_value=0, value=50000)
-        RECENCY = st.number_input("Recency (days):", min_value=0, value=30)
-        WINES = st.number_input("Wines Purchased:", min_value=0, value=10)
-        FRUITS = st.number_input("Fruits Purchased:", min_value=0, value=5)
-        MEAT = st.number_input("Meat Purchased:", min_value=0, value=8)
-        FISH = st.number_input("Fish Purchased:", min_value=0, value=4)
-        SWEETS = st.number_input("Sweets Purchased:", min_value=0, value=3)
-        GOLD = st.number_input("Gold Purchased:", min_value=0, value=2)
-        NUM_DEALS_PURCHASES = st.slider("Deals Purchases:", 0, 20, 5)
-        NUM_WEB_PURCHASES = st.slider("Web Purchases:", 0, 20, 5)
-        NUM_CATALOG_PURCHASES = st.slider("Catalog Purchases:", 0, 20, 3)
-        NUM_STORE_PURCHASES = st.slider("Store Purchases:", 0, 20, 8)
-        NUM_WEB_VISITS = st.slider("Web Visits in Last Month:", 0, 30, 10)
-        COMPLAIN = st.selectbox("Complain (0-No, 1-Yes):", [0, 1])
-        RESPONSE = st.selectbox("Response (0-No, 1-Yes):", [0, 1])
-        DURATION = st.number_input("Engagement Duration (months):", min_value=0, value=12)
-        AGE = st.number_input("Age:", min_value=18, value=30)
-        TOTAL_SPENT = st.number_input("Total Amount Spent ($):", min_value=0, value=1000)
-        TOTAL_PURCHASES = st.number_input("Total Purchases:", min_value=0, value=20)
-        EDUCATION_LEVEL = st.selectbox("Education Level (1-5):", [1, 2, 3, 4, 5])
-        LIVING_STATUS = st.selectbox("Living Status (1-Alone, 2-Partner):", [1, 2])
-        CHILDREN = st.number_input("Number of Children:", min_value=0, value=0)
-        FAMILY_SIZE = st.number_input("Family Size:", min_value=1, value=2)
-        IS_PARENT = st.selectbox("Is Parent (0-No, 1-Yes):", [0, 1])
-        TOTAL_CAMPAIGN_RESPONSE = st.number_input("Total Campaign Response:", min_value=0, value=1)
+        st.markdown("<h4 style='text-align: center; color: #4A90E2;'>📋 Fill Customer Details</h4>", unsafe_allow_html=True)
+
+        INCOME = st.number_input("💰 Income ($):", min_value=0, value=50000)
+        RECENCY = st.number_input("📆 Recency (days):", min_value=0, value=30)
+        WINES = st.number_input("🍷 Wines Purchased:", min_value=0, value=10)
+        FRUITS = st.number_input("🍎 Fruits Purchased:", min_value=0, value=5)
+        MEAT = st.number_input("🥩 Meat Purchased:", min_value=0, value=8)
+        FISH = st.number_input("🐟 Fish Purchased:", min_value=0, value=4)
+        SWEETS = st.number_input("🍬 Sweets Purchased:", min_value=0, value=3)
+        GOLD = st.number_input("🏅 Gold Purchased:", min_value=0, value=2)
+        NUM_DEALS_PURCHASES = st.slider("📢 Deals Purchases:", 0, 20, 5)
+        NUM_WEB_PURCHASES = st.slider("🖥️ Web Purchases:", 0, 20, 5)
+        NUM_CATALOG_PURCHASES = st.slider("📖 Catalog Purchases:", 0, 20, 3)
+        NUM_STORE_PURCHASES = st.slider("🏬 Store Purchases:", 0, 20, 8)
+        NUM_WEB_VISITS = st.slider("🌐 Web Visits in Last Month:", 0, 30, 10)
+        COMPLAIN = st.selectbox("⚠️ Complain (0-No, 1-Yes):", [0, 1])
+        RESPONSE = st.selectbox("📩 Response (0-No, 1-Yes):", [0, 1])
+        DURATION = st.number_input("⏳ Engagement Duration (months):", min_value=0, value=12)
+        AGE = st.number_input("🎂 Age:", min_value=18, value=30)
+        TOTAL_SPENT = st.number_input("💵 Total Amount Spent ($):", min_value=0, value=1000)
+        TOTAL_PURCHASES = st.number_input("🛍️ Total Purchases:", min_value=0, value=20)
+        EDUCATION_LEVEL = st.selectbox("🎓 Education Level (1-5):", [1, 2, 3, 4, 5])
+        LIVING_STATUS = st.selectbox("🏡 Living Status (1-Alone, 2-Partner):", [1, 2])
+        CHILDREN = st.number_input("👶 Number of Children:", min_value=0, value=0)
+        FAMILY_SIZE = st.number_input("👨‍👩‍👧‍👦 Family Size:", min_value=1, value=2)
+        IS_PARENT = st.selectbox("👨‍👦 Is Parent (0-No, 1-Yes):", [0, 1])
+        TOTAL_CAMPAIGN_RESPONSE = st.number_input("📢 Total Campaign Response:", min_value=0, value=1)
 
     return pd.DataFrame([{  
         'Income': INCOME, 'Recency': RECENCY, 'Wines': WINES, 'Fruits': FRUITS, 'Meat': MEAT, 'Fish': FISH, 'Sweets': SWEETS,
@@ -110,6 +117,7 @@ prediction = kmeans.predict(df_pca)
 
 st.subheader("🎯 Cluster Prediction:")
 st.success(f"💡 The customer belongs to *Cluster {prediction[0]}*.")
+
 
 # Load dataset
 response = requests.get(df_url)
