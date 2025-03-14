@@ -5,6 +5,7 @@ numpy
 scikit-learn
 matplotlib
 seaborn
+openpyxl 
 
 # Jupyter Notebook (optional, if needed)
 notebook
