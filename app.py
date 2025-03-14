@@ -94,10 +94,6 @@ for feature in required_features:
     if feature not in df.columns:
         df[feature] = 0  # Default value
 
-# Preprocess the Input Data
-# Handle missing values (if any columns are missing, we use default strategies)
-df['Income'].fillna(df['Income'].median(), inplace=True)
-
 # Scale the input features
 df_scaled = scaler.transform(df)
 
@@ -112,61 +108,58 @@ st.subheader("Cluster Prediction:")
 st.write(f"The customer belongs to **Cluster {prediction[0]}**.")
 st.success(f"The customer is segmented into **Cluster {prediction[0]}** based on input data.")
 
-# Allow users to upload a dataset for EDA purposes
-data_file = st.file_uploader("Upload your dataset (Excel):", type=['xlsx'])
-if data_file:
-    try:
-        data = pd.read_excel(data_file)  # Reading Excel file
+# Read Local Dataset
+file_path = "E:\\excelR\\project2\\df_clean.xlsx"
+try:
+    data = pd.read_excel(file_path)  # Reading Excel file
 
-        # Display Dataset Summary
-        st.subheader("Dataset Overview")
-        st.write(data.head())
-        st.write("Shape of dataset:", data.shape)
+    # Display Dataset Summary
+    st.subheader("Dataset Overview")
+    st.write(data.head())
+    st.write("Shape of dataset:", data.shape)
 
-        # Correlation Heatmap
-        st.subheader("Correlation Heatmap")
-        numeric_data = data.select_dtypes(include=['float64', 'int64'])
-        if not numeric_data.empty:
-            fig, ax = plt.subplots(figsize=(10, 6))
-            corr = numeric_data.corr()
-            sns.heatmap(corr, annot=True, cmap='coolwarm', fmt='.2f', ax=ax)
-            st.pyplot(fig)
-        else:
-            st.warning("No numeric columns available for correlation heatmap.")
-
-        # Distribution of Numerical Features
-        st.subheader("Feature Distributions")
-        selected_feature = st.selectbox("Select a feature to view its distribution:", numeric_data.columns)
-        fig, ax = plt.subplots()
-        sns.histplot(data[selected_feature], kde=True, ax=ax)
-        ax.set_title(f"Distribution of {selected_feature}")
+    # Correlation Heatmap
+    st.subheader("Correlation Heatmap")
+    numeric_data = data.select_dtypes(include=['float64', 'int64'])
+    if not numeric_data.empty:
+        fig, ax = plt.subplots(figsize=(10, 6))
+        corr = numeric_data.corr()
+        sns.heatmap(corr, annot=True, cmap='coolwarm', fmt='.2f', ax=ax)
         st.pyplot(fig)
+    else:
+        st.warning("No numeric columns available for correlation heatmap.")
 
-        # Pairplot of Features
-        st.subheader("Pairplot of Selected Features")
-        selected_features = st.multiselect("Select features for pairplot:", numeric_data.columns, default=numeric_data.columns[:3])
-        if len(selected_features) >= 2:
-            fig = sns.pairplot(data[selected_features])
-            st.pyplot(fig)
-        else:
-            st.warning("Please select at least two features for the pairplot.")
+    # Distribution of Numerical Features
+    st.subheader("Feature Distributions")
+    selected_feature = st.selectbox("Select a feature to view its distribution:", numeric_data.columns)
+    fig, ax = plt.subplots()
+    sns.histplot(data[selected_feature], kde=True, ax=ax)
+    ax.set_title(f"Distribution of {selected_feature}")
+    st.pyplot(fig)
 
-        # Clustering Visualization
-        st.header("Clustering Visualization")
-        try:
-            data_scaled = scaler.transform(data[required_features])
-            data_pca = pca.transform(data_scaled)
-            data['Cluster'] = kmeans.predict(data_pca)
+    # Pairplot of Features
+    st.subheader("Pairplot of Selected Features")
+    selected_features = st.multiselect("Select features for pairplot:", numeric_data.columns, default=numeric_data.columns[:3])
+    if len(selected_features) >= 2:
+        fig = sns.pairplot(data[selected_features])
+        st.pyplot(fig)
+    else:
+        st.warning("Please select at least two features for the pairplot.")
 
-            fig, ax = plt.subplots(figsize=(10, 6))
-            scatter = ax.scatter(data_pca[:, 0], data_pca[:, 1], c=data['Cluster'], cmap='viridis')
-            legend1 = ax.legend(*scatter.legend_elements(), title="Clusters")
-            ax.add_artist(legend1)
-            ax.set_title("Customer Segmentation (PCA Reduced)")
-            st.pyplot(fig)
-        except Exception as e:
-            st.error("Error in clustering visualization: " + str(e))
+    # Clustering Visualization
+    st.header("Clustering Visualization")
+    try:
+        data_scaled = scaler.transform(data[required_features])
+        data_pca = pca.transform(data_scaled)
+        data['Cluster'] = kmeans.predict(data_pca)
+
+        fig, ax = plt.subplots(figsize=(10, 6))
+        scatter = ax.scatter(data_pca[:, 0], data_pca[:, 1], c=data['Cluster'], cmap='viridis')
+        legend1 = ax.legend(*scatter.legend_elements(), title="Clusters")
+        ax.add_artist(legend1)
+        ax.set_title("Customer Segmentation (PCA Reduced)")
+        st.pyplot(fig)
     except Exception as e:
-        st.error("Error reading the Excel file: " + str(e))
-else:
-    st.info("Please upload a dataset to perform EDA.")
+        st.error("Error in clustering visualization: " + str(e))
+except Exception as e:
+    st.error("Error reading the Excel file: " + str(e))
