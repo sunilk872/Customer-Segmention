@@ -129,7 +129,7 @@ if response.status_code == 200:
     # Feature Distributions
     st.subheader("📈 Feature Distributions")
     selected_feature = st.selectbox("Select feature:", data.select_dtypes(['float64', 'int64']).columns)
-    fig, ax = plt.subplots(figsize=(7, 5))
+    fig, ax = plt.subplots(figsize=(6,6))
     sns.histplot(data[selected_feature], kde=True, ax=ax)
     st.pyplot(fig)
 
