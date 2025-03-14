@@ -139,7 +139,7 @@ if response.status_code == 200:
     data_scaled = scaler.transform(data)
     data_pca = pca.transform(data_scaled)
     data['Cluster'] = kmeans.predict(data_pca)
-    fig, ax = plt.subplots(figsize=(7, 4))
+    fig, ax = plt.subplots(figsize=(8, 5))
     scatter = ax.scatter(data_pca[:, 0], data_pca[:, 1], c=data['Cluster'], cmap='viridis')
     ax.set_title("Clusters Visualization")
     st.pyplot(fig)
