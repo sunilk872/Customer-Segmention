@@ -8,7 +8,6 @@ import requests
 from io import BytesIO
 
 # Function to load pickle files from GitHub
-
 def load_pickle_from_github(url):
     response = requests.get(url)
     if response.status_code == 200:
@@ -56,7 +55,7 @@ def user_input_features():
     IS_PARENT = st.sidebar.selectbox("Is Parent (0-No, 1-Yes):", [0, 1])
     TOTAL_CAMPAIGN_RESPONSE = st.sidebar.number_input("Total Campaign Response:", min_value=0, value=1)
     
-    return pd.DataFrame([{  # Wrap data in a list to create DataFrame
+    return pd.DataFrame([{  
         'Income': INCOME, 'Recency': RECENCY, 'Wines': WINES, 'Fruits': FRUITS, 'Meat': MEAT, 'Fish': FISH, 'Sweets': SWEETS,
         'Gold': GOLD, 'NumDealsPurchases': NUM_DEALS_PURCHASES, 'NumWebPurchases': NUM_WEB_PURCHASES, 'NumCatalogPurchases': NUM_CATALOG_PURCHASES,
         'NumStorePurchases': NUM_STORE_PURCHASES, 'NumWebVisitsMonth': NUM_WEB_VISITS, 'Complain': COMPLAIN, 'Response': RESPONSE,
@@ -87,15 +86,18 @@ prediction = kmeans.predict(df_pca)
 st.subheader("Cluster Prediction:")
 st.success(f"The customer is segmented into **Cluster {prediction[0]}** based on input data.")
 
-# Read dataset from GitHub
+# Read dataset from GitHub with engine="openpyxl"
 try:
     response = requests.get(df_url)
     if response.status_code == 200:
-        data = pd.read_excel(BytesIO(response.content))
-        st.subheader("Dataset Overview")
-        st.write(data.head())
-        st.write("Shape of dataset:", data.shape)
+        try:
+            data = pd.read_excel(BytesIO(response.content), engine="openpyxl")  # Fix applied here
+            st.subheader("Dataset Overview")
+            st.write(data.head())
+            st.write("Shape of dataset:", data.shape)
+        except Exception as e:
+            st.error(f"Error reading dataset: {e}")
     else:
         st.error("Failed to load dataset.")
 except Exception as e:
-    st.error(f"Error reading dataset: {e}")
+    st.error(f"Error fetching dataset: {e}")
