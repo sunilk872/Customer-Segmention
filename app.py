@@ -97,12 +97,18 @@ scaler = load_pickle_from_github(scaler_url)
 pca = load_pickle_from_github(pca_url)
 kmeans = load_pickle_from_github(kmeans_url)
 
-if scaler and pca and kmeans:
-    df_scaled = scaler.transform(df)
-    df_pca = pca.transform(df_scaled)
-    prediction = kmeans.predict(df_pca)
-    st.subheader("🎯 Cluster Prediction:")
-    st.success(f"💡 The customer belongs to *Cluster {prediction[0]}*.")
+# Ensure feature names match before transformation
+expected_features = scaler.feature_names_in_  # Get expected column names from the trained scaler
+df = df[expected_features]  # Reorder and select only expected columns
+
+# Apply transformations
+df_scaled = scaler.transform(df)
+df_pca = pca.transform(df_scaled)
+prediction = kmeans.predict(df_pca)
+
+st.subheader("🎯 Cluster Prediction:")
+st.success(f"💡 The customer belongs to *Cluster {prediction[0]}*.")
+
 
 # Load dataset from GitHub
 response = requests.get(df_url)
