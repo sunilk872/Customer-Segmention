@@ -105,9 +105,10 @@ try:
         st.subheader("Correlation Heatmap")
         numeric_data = data.select_dtypes(include=['float64', 'int64'])
         if not numeric_data.empty:
-            fig, ax = plt.subplots(figsize=(10, 6))
+            fig, ax = plt.subplots(figsize=(14, 8))  
             corr = numeric_data.corr()
             sns.heatmap(corr, annot=True, cmap='coolwarm', fmt='.2f', ax=ax)
+            ax.set_title("Feature Correlation Heatmap", fontsize=14)  
             st.pyplot(fig)
         else:
             st.warning("No numeric columns available for correlation heatmap.")
