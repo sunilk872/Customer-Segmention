@@ -1,9 +1,27 @@
 import streamlit as st
 import pandas as pd
-from pickle import load
+import pickle
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+import requests
+from io import BytesIO
+
+# Function to load pickle files from GitHub
+
+def load_pickle_from_github(url):
+    response = requests.get(url)
+    if response.status_code == 200:
+        return pickle.load(BytesIO(response.content))
+    else:
+        st.error(f"Failed to load {url}")
+        return None
+
+# GitHub URLs for data and models
+df_url = "https://github.com/sunilk872/Customer-Segmention/raw/main/data/df_clean.xlsx"
+kmeans_url = "https://github.com/sunilk872/Customer-Segmention/raw/main/pickle/kmeans_model_2.pkl"
+pca_url = "https://github.com/sunilk872/Customer-Segmention/raw/main/pickle/pca_transformer.pkl"
+scaler_url = "https://github.com/sunilk872/Customer-Segmention/raw/main/pickle/scaler.pkl"
 
 # Title of the App
 st.title('Model Deployment: Customer Segmentation')
@@ -11,7 +29,6 @@ st.title('Model Deployment: Customer Segmentation')
 # Sidebar Header for Inputs
 st.sidebar.header('User Input Parameters')
 
-# Function to Capture User Inputs
 def user_input_features():
     INCOME = st.sidebar.number_input("Insert Income ($):", min_value=0, value=50000)
     RECENCY = st.sidebar.number_input("Insert Recency (days):", min_value=0, value=30)
@@ -38,63 +55,26 @@ def user_input_features():
     FAMILY_SIZE = st.sidebar.number_input("Family Size:", min_value=1, value=2)
     IS_PARENT = st.sidebar.selectbox("Is Parent (0-No, 1-Yes):", [0, 1])
     TOTAL_CAMPAIGN_RESPONSE = st.sidebar.number_input("Total Campaign Response:", min_value=0, value=1)
-
-    # Collect user inputs in a dictionary
-    data = {
-        'Income': INCOME,
-        'Recency': RECENCY,
-        'Wines': WINES,
-        'Fruits': FRUITS,
-        'Meat': MEAT,
-        'Fish': FISH,
-        'Sweets': SWEETS,
-        'Gold': GOLD,
-        'NumDealsPurchases': NUM_DEALS_PURCHASES,
-        'NumWebPurchases': NUM_WEB_PURCHASES,
-        'NumCatalogPurchases': NUM_CATALOG_PURCHASES,
-        'NumStorePurchases': NUM_STORE_PURCHASES,
-        'NumWebVisitsMonth': NUM_WEB_VISITS,
-        'Complain': COMPLAIN,
-        'Response': RESPONSE,
-        'Duration': DURATION,
-        'Age': AGE,
-        'TotalSpent': TOTAL_SPENT,
-        'TotalPurchases': TOTAL_PURCHASES,
-        'EducationLevel': EDUCATION_LEVEL,
-        'LivingStatus': LIVING_STATUS,
-        'Children': CHILDREN,
-        'FamilySize': FAMILY_SIZE,
-        'IsParent': IS_PARENT,
-        'TotalCampaignResponse': TOTAL_CAMPAIGN_RESPONSE
-    }
-    # Convert inputs to DataFrame
-    features = pd.DataFrame(data, index=[0])
-    return features
+    
+    return pd.DataFrame([{  # Wrap data in a list to create DataFrame
+        'Income': INCOME, 'Recency': RECENCY, 'Wines': WINES, 'Fruits': FRUITS, 'Meat': MEAT, 'Fish': FISH, 'Sweets': SWEETS,
+        'Gold': GOLD, 'NumDealsPurchases': NUM_DEALS_PURCHASES, 'NumWebPurchases': NUM_WEB_PURCHASES, 'NumCatalogPurchases': NUM_CATALOG_PURCHASES,
+        'NumStorePurchases': NUM_STORE_PURCHASES, 'NumWebVisitsMonth': NUM_WEB_VISITS, 'Complain': COMPLAIN, 'Response': RESPONSE,
+        'Duration': DURATION, 'Age': AGE, 'TotalSpent': TOTAL_SPENT, 'TotalPurchases': TOTAL_PURCHASES, 'EducationLevel': EDUCATION_LEVEL,
+        'LivingStatus': LIVING_STATUS, 'Children': CHILDREN, 'FamilySize': FAMILY_SIZE, 'IsParent': IS_PARENT, 'TotalCampaignResponse': TOTAL_CAMPAIGN_RESPONSE
+    }])
 
 # Collect Inputs
 df = user_input_features()
 st.subheader('User Input Parameters')
 st.write(df)
 
-# Load Pre-trained Models
-scaler = load(open("E:\\excelR\\project2\\scaler.pkl", 'rb'))
-pca = load(open("E:\\excelR\\project2\\pca_transformer.pkl", 'rb'))
-kmeans = load(open("E:\\excelR\\project2\\kmeans_model_2.pkl", 'rb'))
+# Load models
+scaler = load_pickle_from_github(scaler_url)
+pca = load_pickle_from_github(pca_url)
+kmeans = load_pickle_from_github(kmeans_url)
 
-# Ensure all features expected by the model are present
-required_features = ['Income', 'Recency', 'Wines', 'Fruits', 'Meat', 'Fish', 'Sweets',
-                     'Gold', 'NumDealsPurchases', 'NumWebPurchases', 'NumCatalogPurchases',
-                     'NumStorePurchases', 'NumWebVisitsMonth', 'Complain', 'Response',
-                     'Duration', 'Age', 'TotalSpent', 'TotalPurchases', 'EducationLevel',
-                     'LivingStatus', 'Children', 'FamilySize', 'IsParent',
-                     'TotalCampaignResponse']
-
-# Add missing features with default values
-for feature in required_features:
-    if feature not in df.columns:
-        df[feature] = 0  # Default value
-
-# Scale the input features
+# Scale input features
 df_scaled = scaler.transform(df)
 
 # Apply PCA transformation
@@ -105,61 +85,17 @@ prediction = kmeans.predict(df_pca)
 
 # Display Results
 st.subheader("Cluster Prediction:")
-st.write(f"The customer belongs to **Cluster {prediction[0]}**.")
 st.success(f"The customer is segmented into **Cluster {prediction[0]}** based on input data.")
 
-# Read Local Dataset
-file_path = "E:\\excelR\\project2\\df_clean.xlsx"
+# Read dataset from GitHub
 try:
-    data = pd.read_excel(file_path)  # Reading Excel file
-
-    # Display Dataset Summary
-    st.subheader("Dataset Overview")
-    st.write(data.head())
-    st.write("Shape of dataset:", data.shape)
-
-    # Correlation Heatmap
-    st.subheader("Correlation Heatmap")
-    numeric_data = data.select_dtypes(include=['float64', 'int64'])
-    if not numeric_data.empty:
-        fig, ax = plt.subplots(figsize=(10, 6))
-        corr = numeric_data.corr()
-        sns.heatmap(corr, annot=True, cmap='coolwarm', fmt='.2f', ax=ax)
-        st.pyplot(fig)
+    response = requests.get(df_url)
+    if response.status_code == 200:
+        data = pd.read_excel(BytesIO(response.content))
+        st.subheader("Dataset Overview")
+        st.write(data.head())
+        st.write("Shape of dataset:", data.shape)
     else:
-        st.warning("No numeric columns available for correlation heatmap.")
-
-    # Distribution of Numerical Features
-    st.subheader("Feature Distributions")
-    selected_feature = st.selectbox("Select a feature to view its distribution:", numeric_data.columns)
-    fig, ax = plt.subplots()
-    sns.histplot(data[selected_feature], kde=True, ax=ax)
-    ax.set_title(f"Distribution of {selected_feature}")
-    st.pyplot(fig)
-
-    # Pairplot of Features
-    st.subheader("Pairplot of Selected Features")
-    selected_features = st.multiselect("Select features for pairplot:", numeric_data.columns, default=numeric_data.columns[:3])
-    if len(selected_features) >= 2:
-        fig = sns.pairplot(data[selected_features])
-        st.pyplot(fig)
-    else:
-        st.warning("Please select at least two features for the pairplot.")
-
-    # Clustering Visualization
-    st.header("Clustering Visualization")
-    try:
-        data_scaled = scaler.transform(data[required_features])
-        data_pca = pca.transform(data_scaled)
-        data['Cluster'] = kmeans.predict(data_pca)
-
-        fig, ax = plt.subplots(figsize=(10, 6))
-        scatter = ax.scatter(data_pca[:, 0], data_pca[:, 1], c=data['Cluster'], cmap='viridis')
-        legend1 = ax.legend(*scatter.legend_elements(), title="Clusters")
-        ax.add_artist(legend1)
-        ax.set_title("Customer Segmentation (PCA Reduced)")
-        st.pyplot(fig)
-    except Exception as e:
-        st.error("Error in clustering visualization: " + str(e))
+        st.error("Failed to load dataset.")
 except Exception as e:
-    st.error("Error reading the Excel file: " + str(e))
+    st.error(f"Error reading dataset: {e}")
